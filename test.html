@@ -1,0 +1,308 @@
+<!--test.html-->
+<!--this is the html file that shows to the user -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-commerce Database Tables</title>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+  
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+  
+    h2 {
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      background-color: #fff;
+    }
+  
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+  
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+  
+    .btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+  
+    .btn:hover {
+      background-color: #45a049;
+    }
+  
+    .btn-danger {
+      background-color: #f44336;
+    }
+  
+    .btn-danger:hover {
+      background-color: #da190b;
+    }
+  
+    @media screen and (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+    }
+  </style>
+  </head>
+  <body>
+  
+  <div class="container">
+  
+    <!-- User Table -->
+  <h2>User Table</h2>
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>User ID</th>
+        <th>Username</th>
+        <th>Password</th>
+        <th>Preferences</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- User data will be populated here -->
+    </tbody>
+  </table>
+  <button class="btn" onclick="addUser()">Add User</button>
+  <button class="btn" onclick="getUsers()">Refresh</button>
+  <button class="btn btn-danger" onClick="deleteUser()">Delete User</button>
+  
+  <!-- Product Table -->
+  <h2>Product Table</h2>
+  <table id="productTable">
+    <thead>
+      <tr>
+        <th>Product ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Manufacturer Name</th>
+        <th>Inventory Count</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <!-- Product data will be populated here -->
+    </tbody>
+  </table>
+  <button class="btn" onclick="addProduct()">Add Product</button>
+  <button class="btn" onclick="getProducts()">Refresh</button>
+  <button class="btn btn-danger" onClick="deleteProduct()">Delete Product</button>
+  
+  <!-- Products Bought Table -->
+  <h2>Products Bought Table</h2>
+  <table id="productsBoughtTable">
+    <thead>
+      <tr>
+        <th>User Product ID</th>
+        <th>User ID</th>
+        <th>Product ID</th>
+        <th>User Name</th>
+        <th>Date of Purchase</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Products bought data will be populated here -->
+    </tbody>
+  </table>
+  <button class="btn" onclick="addProductsBought()">Add Products Bought</button>
+  <button class="btn" onclick="getProductsBought()">Refresh</button>
+  <button class="btn btn-danger" onClick="deleteProductsBought()">Delete Products Bought</button>
+  
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.4/axios.min.js"></script>
+<script>
+  
+  //PRE: none
+  //POST: gets the users from the database and populates the user table
+  function getUsers() {
+    axios.get('/users')
+      .then(response => {
+        const users = response.data;
+        const userTableBody = document.querySelector('#userTable tbody');
+        userTableBody.innerHTML = '';
+        users.forEach(user => {
+          const row = `
+            <tr>
+              <td>${user.userID}</td>
+              <td>${user.userName}</td>
+              <td>${user.userPassword}</td>
+              <td>${user.userPreferences}</td>
+              <td><button onclick="deleteUser(${user.userID})">Delete</button></td>
+            </tr>
+          `;
+          userTableBody.innerHTML += row;
+        });
+      })
+      .catch(error => console.error('Error fetching users:', error));
+  }
+
+  //PRE: productId is the id of the product to be deleted
+  //POST: deletes the product from the database
+  function getProducts() {
+    axios.get('/products')
+      .then(response => {
+        const products = response.data;
+        const productTableBody = document.querySelector('#productTable tbody');
+        productTableBody.innerHTML = '';
+        products.forEach(product => {
+          const row = `
+            <tr>
+              <td>${product.productID}</td>
+              <td>${product.name}</td>
+              <td>${product.description}</td>
+              <td>${product.manufacturerName}</td>
+              <td>${product.inventoryCount}</td>
+              <td><button onclick="deleteProduct(${product.productID})">Delete</button></td>
+            </tr>
+          `;
+          productTableBody.innerHTML += row;
+        });
+      })
+      .catch(error => console.error('Error fetching products:', error));
+  }
+
+ //PRE: userId is the id of the user to be deleted
+  //POST: deletes the user from the database
+  function getProductsBought() {
+    axios.get('/productsBought')
+      .then(response => {
+        const productsBought = response.data;
+        const productsBoughtTableBody = document.querySelector('#productsBoughtTable tbody');
+        productsBoughtTableBody.innerHTML = '';
+        productsBought.forEach(productBought => {
+          const row = `
+            <tr>
+              <td>${productBought.userProductID}</td>
+              <td>${productBought.userID}</td>
+              <td>${productBought.productID}</td>
+              <td>${productBought.userName}</td>
+              <td>${productBought.dateOfPurchase}</td>
+              <td><button onclick="deleteProductsBought(${productBought.userProductID})">Delete</button></td>
+            </tr>
+          `;
+          productsBoughtTableBody.innerHTML += row;
+        });
+      })
+      .catch(error => console.error('Error fetching products bought:', error));
+  }
+
+  //PRE: userId is the id of the user to be deleted
+  //POST: deletes the user from the database
+  function addUser() {
+    const userName = prompt('Enter username:');
+    const userPassword = prompt('Enter password:');
+    const userPreferences = prompt('Enter preferences:');
+    axios.post('/users', { userName, userPassword, userPreferences })
+      .then(() => {
+        getUsers(); // Refresh user table after adding
+      })
+      .catch(error => console.error('Error adding user:', error));
+  }
+
+  //PRE: productId is the id of the product to be deleted
+  //POST: deletes the product from the database
+  function addProduct() {
+    const name = prompt('Enter product name:');
+    const description = prompt('Enter product description:');
+    const manufacturerName = prompt('Enter manufacturer name:');
+    const inventoryCount = prompt('Enter inventory count:');
+    axios.post('/products', { name, description, manufacturerName, inventoryCount })
+      .then(() => {
+        getProducts(); // Refresh product table after adding
+      })
+      .catch(error => console.error('Error adding product:', error));
+  }
+
+  //PRE: userId is the id of the user to be deleted
+  //POST: deletes the user from the database
+  function addProductsBought() {
+    const userID = prompt('Enter user ID:');
+    const productID = prompt('Enter product ID:');
+    const userName = prompt('Enter user name:');
+    const dateOfPurchase = prompt('Enter date of purchase:');
+    axios.post('/productsBought', { userID, productID, userName, dateOfPurchase })
+      .then(() => {
+        getProductsBought(); // Refresh product bought table after adding
+      })
+      .catch(error => console.error('Error adding product bought:', error));
+  }
+
+ //PRE: userId is the id of the user to be deleted
+  //POST: deletes the user from the database
+  function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user?')) {
+      axios.delete(`/users/${userId}`)
+        .then(() => {
+          getUsers(); // Refresh user table after deletion
+        })
+        .catch(error => console.error('Error deleting user:', error));
+    }
+  }
+
+  //PRE: productId is the id of the product to be deleted
+  //POST: deletes the product from the database
+  function deleteProduct(productId) {
+    if (confirm('Are you sure you want to delete this product?')) {
+      axios.delete(`/products/${productId}`)
+        .then(() => {
+          getProducts(); // Refresh product table after deletion
+        })
+        .catch(error => console.error('Error deleting product:', error));
+    }
+  }
+
+  //PRE: userProductID is the id of the product bought
+  //POST: deletes the product bought from the database
+  function deleteProductsBought(userProductID) {
+    if (confirm('Are you sure you want to delete this product bought?')) {
+      axios.delete(`/productsBought/${userProductID}`)
+        .then(() => {
+          getProductsBought(); // Refresh product bought table after deletion
+        })
+        .catch(error => console.error('Error deleting product bought:', error));
+    }
+  }
+
+  // Fetch data when the page loads
+  window.onload = function () {
+    getUsers();
+    getProducts();
+    getProductsBought(); // Call getProductsBought() to populate the products bought table
+  };
+</script>
+
+</body>
+</html>
